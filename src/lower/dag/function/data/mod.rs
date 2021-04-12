@@ -1,17 +1,16 @@
 use crate::ir::function::basic_block::{BasicBlock, BasicBlockId};
-use crate::lower::dag::function::instruction::{Instruction, InstructionData, InstructionId};
+use crate::lower::dag::function::node::{Node, NodeData, NodeId};
 use id_arena::Arena;
-// use rustc_hash::FxHashMap;
 
-pub struct Data<InstData: InstructionData> {
-    pub instructions: Arena<Instruction<InstData>>,
+pub struct Data<D: NodeData> {
+    pub nodes: Arena<Node<D>>,
     pub basic_blocks: Arena<BasicBlock>,
 }
 
-impl<InstData: InstructionData> Data<InstData> {
+impl<D: NodeData> Data<D> {
     pub fn new() -> Self {
         Self {
-            instructions: Arena::new(),
+            nodes: Arena::new(),
             basic_blocks: Arena::new(),
         }
     }
@@ -20,10 +19,10 @@ impl<InstData: InstructionData> Data<InstData> {
         self.basic_blocks.alloc(BasicBlock::new())
     }
 
-    pub fn create_inst(&mut self, mut inst: Instruction<InstData>) -> InstructionId<InstData> {
-        self.instructions.alloc_with_id(|id| {
-            inst.id = Some(id);
-            inst
+    pub fn create_node(&mut self, mut node: Node<D>) -> NodeId<D> {
+        self.nodes.alloc_with_id(|id| {
+            node.id = Some(id);
+            node
         })
     }
 
@@ -36,11 +35,11 @@ impl<InstData: InstructionData> Data<InstData> {
         &mut self.basic_blocks[id]
     }
 
-    pub fn inst_ref(&self, id: InstructionId<InstData>) -> &Instruction<InstData> {
-        &self.instructions[id]
+    pub fn node_ref(&self, id: NodeId<D>) -> &Node<D> {
+        &self.nodes[id]
     }
 
-    pub fn inst_ref_mut(&mut self, id: InstructionId<InstData>) -> &mut Instruction<InstData> {
-        &mut self.instructions[id]
+    pub fn node_ref_mut(&mut self, id: NodeId<D>) -> &mut Node<D> {
+        &mut self.nodes[id]
     }
 }
