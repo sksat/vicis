@@ -30,7 +30,6 @@ impl<D: NodeData> Data<D> {
         &self.basic_blocks[id]
     }
 
-    // TODO: Is this the right way?
     pub fn block_ref_mut(&mut self, id: BasicBlockId) -> &mut BasicBlock {
         &mut self.basic_blocks[id]
     }

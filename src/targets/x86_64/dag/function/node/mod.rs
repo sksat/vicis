@@ -2,6 +2,7 @@ use crate::lower::dag::function::node::{NodeData as ND, NodeId};
 
 #[derive(Debug, Clone)]
 pub enum NodeData {
+    Root,
     Inst(Inst<Self>),
     Int32(i32),
 }
@@ -38,4 +39,24 @@ impl<Data: ND> Inst<Data> {
     }
 }
 
-impl ND for NodeData {}
+impl ND for NodeData {
+    fn root() -> Self {
+        Self::Root
+    }
+
+    fn args(&self) -> &[NodeId<Self>] {
+        match self {
+            Self::Root => &[],
+            Self::Inst(inst) => &inst.args,
+            Self::Int32(_) => &[],
+        }
+    }
+
+    fn dot_label(&self) -> String {
+        match self {
+            Self::Root => "Root".to_string(),
+            Self::Inst(inst) => format!("{:?}", inst.opcode),
+            Self::Int32(i) => format!("{}", i),
+        }
+    }
+}

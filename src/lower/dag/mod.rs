@@ -12,7 +12,7 @@ use crate::{
     lower::{
         dag::function::{
             data::Data as DagData,
-            node::{NodeData, NodeId},
+            node::{Node, NodeData, NodeId},
         },
         isa::TargetIsa,
     },
@@ -58,7 +58,7 @@ pub fn convert_function<'a, T: TargetIsa>(
     function: &'a IrFunction,
 ) -> Result<function::Function<'a, T>> {
     let mut dag_data = DagData::new();
-    let mut layout = function::layout::Layout::new();
+    let mut layout = function::layout::Layout::<<T::IrToDag as IrToDag<T>>::NodeData>::new();
     let mut block_map = FxHashMap::default();
 
     // Create dag basic blocks
@@ -81,9 +81,14 @@ pub fn convert_function<'a, T: TargetIsa>(
         }
     }
 
-    // let mut dag_data = DagData::new();
-
     for (_i, block_id) in function.layout.block_iter().enumerate() {
+        let root = dag_data.create_node(Node::new(
+            <T::IrToDag as IrToDag<T>>::NodeData::root(),
+            block_id,
+        ));
+        let mut chain = root;
+        layout.set_node_root(root, block_map[&block_id]);
+
         let mut ctx = Context {
             isa,
             ir_data: &function.data,
@@ -92,8 +97,30 @@ pub fn convert_function<'a, T: TargetIsa>(
         };
         for inst_id in function.layout.inst_iter(block_id).rev() {
             let inst = function.data.inst_ref(inst_id);
-            T::IrToDag::convert(&mut ctx, inst)?;
+            let node_id = T::IrToDag::convert(&mut ctx, inst)?;
+            ctx.dag_data.node_ref_mut(chain).set_chain(node_id);
+            chain = node_id;
         }
+
+        // TODO: Refine code
+
+        println!("digraph {{");
+        println!("  node [shape=box]");
+
+        for (id, node) in &ctx.dag_data.nodes {
+            println!("  id{} [label=\"{}\"]", id.index(), node.data.dot_label());
+        }
+
+        chain = root;
+        while let Some(node) = ctx.dag_data.node_ref(chain).chain {
+            println!("  id{} -> id{} [color=red]", chain.index(), node.index());
+            for arg in ctx.dag_data.node_ref(node).data.args() {
+                println!("  id{} -> id{} [color=blue]", node.index(), arg.index());
+            }
+            chain = node
+        }
+
+        println!("}}");
     }
 
     Ok(function::Function::new(isa, function))
