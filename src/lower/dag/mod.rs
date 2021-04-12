@@ -3,10 +3,15 @@ pub mod module;
 
 use crate::{
     ir::{
-        function::{instruction::Instruction as IrInst, Function as IrFunction},
+        function::{
+            data::Data as IrData, instruction::Instruction as IrInst, Function as IrFunction,
+        },
         module::Module as IrModule,
     },
-    lower::isa::TargetIsa,
+    lower::{
+        dag::function::{data::Data as DagData, instruction::InstructionData},
+        isa::TargetIsa,
+    },
 };
 use anyhow::Result;
 use id_arena::Arena;
@@ -14,11 +19,14 @@ use rustc_hash::FxHashMap;
 use std::{error::Error as StdError, fmt};
 
 pub trait IrToDag<T: TargetIsa> {
+    type InstData: InstructionData;
     fn convert(ctx: &mut Context<T>, inst: &IrInst) -> Result<()>;
 }
 
 pub struct Context<'a, T: TargetIsa> {
     pub isa: &'a T,
+    pub ir_data: &'a IrData,
+    pub dag_data: &'a mut DagData<<T::IrToDag as IrToDag<T>>::InstData>,
 }
 
 #[derive(Debug)]
@@ -44,7 +52,8 @@ pub fn convert_function<'a, T: TargetIsa>(
     isa: &'a T,
     function: &'a IrFunction,
 ) -> Result<function::Function<'a, T>> {
-    let mut data = function::data::Data::new();
+    let mut data: function::data::Data<<T::IrToDag as IrToDag<T>>::InstData> =
+        function::data::Data::new();
     let mut layout = function::layout::Layout::new();
     let mut block_map = FxHashMap::default();
 
@@ -54,7 +63,12 @@ pub fn convert_function<'a, T: TargetIsa>(
         block_map.insert(block_id, new_block_id);
     }
 
-    let mut ctx = Context { isa };
+    let mut dag_data = DagData::new();
+    let mut ctx = Context {
+        isa,
+        ir_data: &function.data,
+        dag_data: &mut dag_data,
+    };
 
     for (_i, block_id) in function.layout.block_iter().enumerate() {
         for inst_id in function.layout.inst_iter(block_id).rev() {

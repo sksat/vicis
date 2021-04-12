@@ -1,4 +1,5 @@
 pub mod data;
+pub mod instruction;
 pub mod layout;
 
 use crate::{ir::function::Function as IrFunction, lower::isa::TargetIsa};

@@ -1,13 +1,16 @@
+pub mod function;
+
 use crate::{
     ir::function::instruction::{Instruction as IrInst, Operand},
     lower::dag::{Context, Error, IrToDag as ITD},
-    targets::x86_64::X86_64,
+    targets::x86_64::{dag::function::instruction::InstructionData, X86_64},
 };
 use anyhow::Result;
 
 pub struct IrToDag {}
 
 impl ITD<X86_64> for IrToDag {
+    type InstData = InstructionData;
     fn convert(ctx: &mut Context<X86_64>, inst: &IrInst) -> Result<()> {
         convert(ctx, inst)
     }
