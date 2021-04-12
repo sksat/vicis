@@ -7,6 +7,7 @@ pub mod exec;
 pub mod ir;
 pub mod lower;
 pub mod pass;
+pub mod targets;
 pub mod traits;
 
 extern crate anyhow;
