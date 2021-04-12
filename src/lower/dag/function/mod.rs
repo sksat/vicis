@@ -1,3 +1,5 @@
+pub mod data;
+
 use crate::ir::function::Function as IrFunction;
 
 pub struct Function<'a> {
