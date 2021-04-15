@@ -104,23 +104,67 @@ pub fn convert_function<'a, T: TargetIsa>(
 
         // TODO: Refine code
 
-        println!("digraph {{");
-        println!("  node [shape=box]");
+        use std::{fs, io::Write};
+
+        let mut file = fs::File::create("./bb.dot").unwrap();
+
+        writeln!(file, "digraph {{").unwrap();
+        writeln!(file, "  node [shape=record]").unwrap();
 
         for (id, node) in &ctx.dag_data.nodes {
-            println!("  id{} [label=\"{}\"]", id.index(), node.data.dot_label());
+            if node.data.args().len() == 0 {
+                writeln!(
+                    file,
+                    "  id{} [label=\"{{{{<ch>ch|<dep>dep}}|{}}}\"]",
+                    id.index(),
+                    node.data.dot_label()
+                )
+                .unwrap();
+                continue;
+            }
+
+            writeln!(
+                file,
+                "  id{} [label=\"{{{{<ch>ch|<dep>dep{}}}|{}}}\"]",
+                id.index(),
+                node.data
+                    .args()
+                    .iter()
+                    .enumerate()
+                    .fold("|".to_string(), |acc, (i, _id)| {
+                        format!("{}<a{}>{}|", acc, i, i)
+                    })
+                    .trim_end_matches('|'),
+                node.data.dot_label()
+            )
+            .unwrap();
         }
 
         chain = root;
         while let Some(node) = ctx.dag_data.node_ref(chain).chain {
-            println!("  id{} -> id{} [color=red]", chain.index(), node.index());
-            for arg in ctx.dag_data.node_ref(node).data.args() {
-                println!("  id{} -> id{} [color=blue]", node.index(), arg.index());
+            writeln!(
+                file,
+                "  id{}:ch -> id{}:ch [color=red]",
+                chain.index(),
+                node.index()
+            )
+            .unwrap();
+            for (i, arg) in ctx.dag_data.node_ref(node).data.args().iter().enumerate() {
+                writeln!(
+                    file,
+                    "  id{}:a{} -> id{}:dep [color=blue]",
+                    node.index(),
+                    i,
+                    arg.index()
+                )
+                .unwrap();
             }
             chain = node
         }
 
-        println!("}}");
+        writeln!(file, "}}").unwrap();
+
+        file.flush().unwrap();
     }
 
     Ok(function::Function::new(isa, function))
