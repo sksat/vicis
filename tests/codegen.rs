@@ -43,3 +43,20 @@ fn compile_tests() {
 
     pb.finish();
 }
+
+// #[test]
+// fn running() {
+//     use std::fs;
+//     let input_body = &fs::read_to_string("./c.ll").unwrap();
+//     let module = module::parse_assembly(input_body).unwrap();
+//     let mach_module = compile_module(vicis::codegen::isa::x86_64::X86_64, module).unwrap();
+//
+//     println!("{}", mach_module);
+//
+//     // assert_eq!(
+//     //     &format!("{}", mach_module),
+//     //     output_body,
+//     //     "Failed at {}",
+//     //     input
+//     // );
+// }

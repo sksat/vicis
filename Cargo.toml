@@ -20,6 +20,8 @@ id-arena = "= 2.2.1"
 anyhow = "= 1.0.38"
 libffi = "= 1.0.1"
 libloading = "= 0.7.0"
+iced-x86 = "= 1.11.3"
+memmap = "= 0.7.0"
 
 [dev-dependencies]
 indicatif = "= 0.15.0"

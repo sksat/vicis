@@ -302,21 +302,28 @@ impl OperandData {
     pub fn as_reg(&self) -> &Reg {
         match self {
             Self::Reg(r) => r,
-            _ => todo!(),
+            _ => panic!(),
         }
     }
 
     pub fn as_vreg(&self) -> &VReg {
         match self {
             Self::VReg(r) => r,
-            _ => todo!(),
+            _ => panic!(),
         }
     }
 
     pub fn as_block(&self) -> &BasicBlockId {
         match self {
             Self::Block(b) => b,
-            _ => todo!(),
+            _ => panic!(),
+        }
+    }
+
+    pub fn as_i32(&self) -> i32 {
+        match self {
+            Self::Int32(i) => *i,
+            _ => panic!(),
         }
     }
 }

@@ -1,3 +1,5 @@
+pub mod assembler;
+
 use crate::codegen::{
     function::Function,
     isa::x86_64::{
