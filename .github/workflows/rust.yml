@@ -41,29 +41,14 @@ jobs:
       working-directory: ./vicis_ir
       run: |
             cargo test; \
-            REPORT=$(find ./target/debug -maxdepth 2 -regex '.+/deps/.*' -a ! -regex '.+\.\(d\|rlib\|rmeta\|so\)'); \
-            for file in $REPORT; do \
-              echo $file; \
-              kcov --include-pattern=vicis_ir/src --exclude-pattern=/.cargo ./target/cov "$file"; \
-              bash <(curl -s https://codecov.io/bash) -s ./target/cov; \
-            done
+            bash ../.github/kcov.sh
     - name: Run kcov vicis_codegen
       working-directory: ./vicis_codegen
       run: |
             cargo test; \
-            REPORT=$(find ./target/debug -maxdepth 2 -regex '.+/deps/.*' -a ! -regex '.+\.\(d\|rlib\|rmeta\|so\)'); \
-            for file in $REPORT; do \
-              echo $file; \
-              kcov --include-pattern=vicis_codegen/src --exclude-pattern=/.cargo ./target/cov "$file"; \
-              bash <(curl -s https://codecov.io/bash) -s ./target/cov; \
-            done
+            bash ../.github/kcov.sh
     - name: Run kcov vicis_interpreter
       working-directory: ./vicis_interpreter
       run: |
             cargo test; \
-            REPORT=$(find ./target/debug -maxdepth 2 -regex '.+/deps/.*' -a ! -regex '.+\.\(d\|rlib\|rmeta\|so\)'); \
-            for file in $REPORT; do \
-              echo $file; \
-              kcov --include-pattern=vicis_interpreter/src --exclude-pattern=/.cargo ./target/cov "$file"; \
-              bash <(curl -s https://codecov.io/bash) -s ./target/cov; \
-            done
+            bash ../.github/kcov.sh
