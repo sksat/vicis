@@ -19,6 +19,8 @@ jobs:
     - uses: actions-rs/toolchain@v1
       with:
         toolchain: nightly
+        components: clippy
+        override: true
     - name: Install dependencies
       env: 
         ACCEPT_EULA: Y
@@ -52,3 +54,22 @@ jobs:
       run: |
             cargo test; \
             bash ../.github/kcov.sh
+
+    - name: clippy check
+      working-directory: ./vicis_ir
+      uses: actions-rs/clippy-check@v1.0.7
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: --all-features
+    - name: clippy check vicis_codegen
+      working-directory: ./vicis_codegen
+      uses: actions-rs/clippy-check@v1.0.7
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: --all-features
+    - name: clippy check vicis_interpreter
+      working-directory: ./vicis_interpreter
+      uses: actions-rs/clippy-check@v1.0.7
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: --all-features
